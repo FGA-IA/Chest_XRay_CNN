@@ -8,14 +8,14 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 os.chdir(r'.')
 set_printoptions(precision=4, suppress=True)
 os.listdir('.')
-rede = '/redes/chest_xray_cnn_0.64.h5'
+rede = '/redes/chest_xray_cnn_0.68.h5'
 
 my_model = load_model(filepath='./' + rede)
 print(my_model.summary())
 
 eval_idg = ImageDataGenerator(rescale=1. / 255)
 eval_g = eval_idg.flow_from_directory(directory=r'data/val/',
-                                     target_size=(100,100),
+                                     target_size=(150,150),
                                      class_mode='binary',
                                      batch_size=20,
                                      shuffle=False)

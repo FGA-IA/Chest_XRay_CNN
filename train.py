@@ -68,7 +68,9 @@ my_model.add(layers.Activation('sigmoid'))
 print(my_model.summary())
 
 # Model Loss function and Optimizer method
-compile = my_model.compile(optimizer=optimizers.sgd(lr=0.15), loss='binary_crossentropy',
+#compile = my_model.compile(optimizer=optimizers.sgd(lr=0.15), loss='binary_crossentropy',
+                           #metrics=['accuracy'])
+compile = my_model.compile(optimizer='rmsprop', loss='binary_crossentropy',
                            metrics=['accuracy'])
 
 # Settting Callbacks
@@ -83,7 +85,7 @@ callb_l = [check_p, reduce_lr]
 fit = my_model.fit_generator(
   generator=train_g,
   #steps_per_epoch=10, 
-  steps_per_epoch=5218//batch_size, 
+  #steps_per_epoch=5218//batch_size, 
   epochs=100, 
   verbose=1,
   callbacks=callb_l, 
