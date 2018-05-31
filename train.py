@@ -7,6 +7,8 @@ from keras import models, layers, optimizers, callbacks
 environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 chdir(r'./')
 
+batch_size = 125
+
 # Setting Image and Data Generators
 train_idg = ImageDataGenerator(rescale=1. / 255,
                                zoom_range=[1.0, 1.25],
@@ -15,23 +17,23 @@ train_idg = ImageDataGenerator(rescale=1. / 255,
                                fill_mode='reflect')
 
 train_g = train_idg.flow_from_directory(directory=r'data/train',
-                                        target_size=(100, 100),
+                                        target_size=(150, 150),
                                         class_mode='binary',
-                                        batch_size=125,
+                                        batch_size=batch_size,
                                         shuffle=True)
 
 test_idg = ImageDataGenerator(rescale=1. / 255)
 
 test_g = test_idg.flow_from_directory(directory=r'data/test',
-                                        target_size=(100, 100),
+                                        target_size=(150, 150),
                                         class_mode='binary',
-                                        batch_size=125,
+                                        batch_size=batch_size,
                                         shuffle=True)
 
 # CNN Architecture
 my_model = models.Sequential()
 my_model.add(layers.Conv2D(filters=16, kernel_size=(2, 2), strides=(1, 1),
-                           input_shape=(100, 100, 3)))
+                           input_shape=(150, 150, 3)))
 my_model.add(layers.Activation('relu'))
 my_model.add(layers.Conv2D(filters=16, kernel_size=(2, 2), strides=(1, 1)))
 my_model.add(layers.Activation('relu'))
@@ -70,7 +72,7 @@ compile = my_model.compile(optimizer=optimizers.sgd(lr=0.15), loss='binary_cross
                            metrics=['accuracy'])
 
 # Settting Callbacks
-check_p = callbacks.ModelCheckpoint(filepath='chest_xray_cnn_{val_acc:.2f}.h5',
+check_p = callbacks.ModelCheckpoint(filepath='redes/chest_xray_cnn_{val_acc:.2f}.h5',
                                     monitor='val_acc', verbose=1,
                                     save_best_only=True, save_weights_only=False)
 reduce_lr = callbacks.ReduceLROnPlateau(monitor='val_acc', factor=0.95, patience=3,
@@ -78,8 +80,16 @@ reduce_lr = callbacks.ReduceLROnPlateau(monitor='val_acc', factor=0.95, patience
 callb_l = [check_p, reduce_lr]
 
 # Training Options
-fit = my_model.fit_generator(generator=train_g, steps_per_epoch=22, epochs=100, verbose=1,
-                             callbacks=callb_l, validation_data=test_g, validation_steps=4)
+fit = my_model.fit_generator(
+  generator=train_g,
+  #steps_per_epoch=10, 
+  steps_per_epoch=5218//batch_size, 
+  epochs=100, 
+  verbose=1,
+  callbacks=callb_l, 
+  validation_data=test_g, 
+  #validation_steps=4)
+  validation_steps=626//batch_size)
 
 # Saving Model
 my_model.save(filepath=r'chest_final_cnn.h5', overwrite=True)
